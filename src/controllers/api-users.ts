@@ -27,3 +27,92 @@ export const login = async (req: Request, res: Response) => {
     });
   }
 };
+
+// Cria um usuário
+export const createUser = async (req: Request, res: Response) => {
+  try {
+    const { username, password } = req.body;
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        password,
+      },
+    });
+    return res.status(201).send({ message: "User created successfully.", user: newUser });
+  } catch (error) {
+    return res.status(500).send({
+      message: error instanceof Error ? error.message : "An unexpected error occurred while creating user."
+    });
+  }
+};
+
+// Lista todos os usuários
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await prisma.user.findMany();
+    return res.status(200).send({ data: users });
+  } catch (error) {
+    return res.status(500).send({
+      message: error instanceof Error ? error.message : "An unexpected error occurred while fetching users."
+    });
+  }
+};
+
+// Obtém um usuário pelo ID
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) {
+      return res.status(404).send({ message: "User not found." });
+    }
+    return res.status(200).send({ data: user });
+  } catch (error) {
+    return res.status(500).send({
+      message: error instanceof Error ? error.message : "An unexpected error occurred while fetching user."
+    });
+  }
+};
+
+// Atualiza um usuário pelo ID
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const { username, password } = req.body;
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        username,
+        password,
+      },
+    });
+    return res.status(200).send({ message: "User updated successfully.", user: updatedUser });
+  } catch (error) {
+    return res.status(500).send({
+      message: error instanceof Error ? error.message : "An unexpected error occurred while updating user."
+    });
+  }
+};
+
+// Deleta um usuário pelo ID
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+    await prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+    return res.status(200).send({ message: "User deleted successfully." });
+  } catch (error) {
+    return res.status(500).send({
+      message: error instanceof Error ? error.message : "An unexpected error occurred while deleting user."
+    });
+  }
+};
